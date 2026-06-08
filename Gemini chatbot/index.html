@@ -4,25 +4,42 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gemini chatbot</title>
-    <link rel="stylesheet" href ="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="chat-container">
-        <div class ="chat-header">
-            <h1>
-                Gemini Chatbot
-            </h1>
-        </div>
-        <div class ="chat-messages" id="chat-messages">
-
-        </div>
-        <div class ="chat-input-container">
-            <input type="text" id ="user-input" placeholder="Type your message">
-            <button id ="send-button">Send</button>
-
-        </div>
+    <div class="page-bg" aria-hidden="true">
+        <span class="orb orb-one"></span>
+        <span class="orb orb-two"></span>
+        <span class="grid-overlay"></span>
     </div>
 
-    <script src = "script.js"> </script>
+    <main class="app-shell">
+        <section class="chat-container">
+            <header class="chat-header">
+                <div class="brand-copy">
+                    <p class="kicker">AI Companion</p>
+                    <h1>Gemini Chatbot</h1>
+                </div>
+                <span class="status-pill">Online</span>
+            </header>
+
+            <div class="chat-messages" id="chat-messages">
+                <div class="empty-state" id="empty-state">
+                    <h2>Start a new conversation</h2>
+                    <p>Ask for ideas, code, travel plans, study help, or anything you are curious about.</p>
+                </div>
+            </div>
+
+            <form class="chat-input-container" id="chat-form" autocomplete="off">
+                <input type="text" id="user-input" placeholder="Message Gemini..." aria-label="Type your message">
+                <button id="send-button" type="submit">Send</button>
+            </form>
+        </section>
+    </main>
+
+    <script src="script.js"></script>
 </body>
 </html>

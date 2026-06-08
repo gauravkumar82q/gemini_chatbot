@@ -1,0 +1,13 @@
+{
+  "name": "gemini-chatbot-secure",
+  "version": "1.0.0",
+  "private": true,
+  "main": "server.js",
+  "scripts": {
+    "start": "node init && node server.js",
+    "dev": "node init && node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}

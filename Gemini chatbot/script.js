@@ -1,34 +1,42 @@
-const API_KEY = 'AIzaSyDhGXipp3yA_n4DPjvSsX_alzNW-V5liFQ';
-const API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent';
 const chatMessages = document.getElementById('chat-messages');
+const chatForm = document.getElementById('chat-form');
 const userInput = document.getElementById('user-input');
 const sendButton = document.getElementById('send-button');
+const emptyState = document.getElementById('empty-state');
+
+function removeEmptyState() {
+    if (emptyState && emptyState.parentNode) {
+        emptyState.parentNode.removeChild(emptyState);
+    }
+}
 
 async function generateResponse(prompt) {
-    const response = await fetch(`${API_URL}?key=${API_KEY}`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            contents: [
-                {
-                    parts: [
-                        {
-                            text: prompt
-                        }
-                    ]
-                }
-            ]
-        })
-    });
+    let response;
 
-    if (!response.ok) {
-        throw new Error('Failed to generate response');
+    try {
+        response = await fetch('/api/chat', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ prompt })
+        });
+    } catch (fetchError) {
+        throw new Error('Network request failed. Start the local server and verify internet access.');
     }
 
     const data = await response.json();
-    return data.candidates[0].content.parts[0].text;
+
+    if (!response.ok) {
+        throw new Error(data?.error || 'Failed to generate response.');
+    }
+
+    const text = data?.text;
+    if (!text) {
+        throw new Error('Model returned an empty response.');
+    }
+
+    return text;
 }
 
 function cleanMarkdown(text) {
@@ -39,7 +47,27 @@ function cleanMarkdown(text) {
         .trim();
 }
 
+function getReadableError(error) {
+    const rawMessage = error?.message || 'Unknown error occurred.';
+
+    if (rawMessage.includes('429') || rawMessage.toLowerCase().includes('rate limit')) {
+        return 'Rate limit reached. Please wait a moment and try again.';
+    }
+
+    if (rawMessage.includes('503') || rawMessage.toLowerCase().includes('busy')) {
+        return 'Gemini is busy right now. Please retry in a few seconds.';
+    }
+
+    if (rawMessage.toLowerCase().includes('network request failed')) {
+        return rawMessage;
+    }
+
+    return rawMessage.slice(0, 200);
+}
+
 function addMessage(message, isUser) {
+    removeEmptyState();
+
     const messageElement = document.createElement('div');
     messageElement.classList.add('message');
     messageElement.classList.add(isUser ? 'user-message' : 'bot-message');
@@ -73,7 +101,8 @@ async function handleUserInput() {
             addMessage(cleanMarkdown(botMessage), false);
         } catch (error) {
             console.error('Error:', error);
-            addMessage('Sorry, I encountered an error. Please try again.', false);
+            const safeErrorMessage = getReadableError(error);
+            addMessage(`Request failed: ${safeErrorMessage}`, false);
         } finally {
             sendButton.disabled = false;
             userInput.disabled = false;
@@ -82,11 +111,7 @@ async function handleUserInput() {
     }
 }
 
-sendButton.addEventListener('click', handleUserInput);
-
-userInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        handleUserInput();
-    }
+chatForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    handleUserInput();
 });
